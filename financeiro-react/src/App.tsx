@@ -11,6 +11,7 @@ import { Types } from './components/Types/Types';
 import { Expenses } from './components/Expenses/Expenses';
 import { Incomes } from './components/Incomes/Incomes';
 import { InitService } from './services/initService';
+import { ErrorBoundary } from './components/Debug/ErrorBoundary';
 
 const theme = createTheme(
   {
@@ -32,22 +33,24 @@ const theme = createTheme(
 function App() {
   useEffect(() => {
     // Inicializar dados de exemplo na primeira execução
-    InitService.initializeSampleData();
+    // InitService.initializeSampleData(); // Comentado temporariamente
   }, []);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/categorias" element={<Categories />} />
-            <Route path="/tipos" element={<Types />} />
-            <Route path="/despesas" element={<Expenses />} />
-            <Route path="/receitas" element={<Incomes />} />
-          </Routes>
-        </Layout>
+        <ErrorBoundary>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/categorias" element={<Categories />} />
+              <Route path="/tipos" element={<Types />} />
+              <Route path="/despesas" element={<Expenses />} />
+              <Route path="/receitas" element={<Incomes />} />
+            </Routes>
+          </Layout>
+        </ErrorBoundary>
       </Router>
     </ThemeProvider>
   );
