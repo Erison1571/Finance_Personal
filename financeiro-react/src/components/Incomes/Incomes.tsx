@@ -118,7 +118,7 @@ export const Incomes: React.FC = () => {
     }
     
     if (selectedMonth !== 'all') {
-      filtered = filtered.filter(income => income.datePrevista.startsWith(selectedMonth));
+      filtered = filtered.filter(income => income.datePrevista && income.datePrevista.startsWith(selectedMonth));
     }
     
     // Aplicar ordenação

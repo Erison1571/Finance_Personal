@@ -121,7 +121,7 @@ export const Expenses: React.FC = () => {
     }
     
     if (selectedMonth !== 'all') {
-      filtered = filtered.filter(expense => expense.datePrevista.startsWith(selectedMonth));
+      filtered = filtered.filter(expense => expense.datePrevista && expense.datePrevista.startsWith(selectedMonth));
     }
     
     if (showOnlyPending) {
