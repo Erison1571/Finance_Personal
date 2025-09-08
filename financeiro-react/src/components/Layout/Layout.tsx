@@ -24,8 +24,6 @@ import {
   TrendingUp
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { DebugInfo } from '../Debug/DebugInfo';
-import { SupabaseTest } from '../Debug/SupabaseTest';
 
 const drawerWidth = 240;
 
@@ -149,8 +147,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           mt: '64px'
         }}
       >
-        <DebugInfo />
-        <SupabaseTest />
         {children}
       </Box>
     </Box>

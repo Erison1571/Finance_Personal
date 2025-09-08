@@ -1,18 +1,13 @@
 services:
   - type: web
-    name: financeiro-react
+    name: financeiro-moura-solutions-v3
     env: node
-    plan: free
     buildCommand: npm install && npm run build
-    startCommand: npm run preview
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false
+    startCommand: npm start
     healthCheckPath: /
-    autoDeploy: true
-    branch: main
-    repo: https://github.com/Erison1571/Finance_Personal.git
+    rootDir: financeiro-react
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: your_supabase_url
+      - key: VITE_SUPABASE_ANON_KEY
+        value: your_supabase_anon_key
