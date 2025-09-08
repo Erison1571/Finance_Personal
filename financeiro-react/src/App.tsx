@@ -10,7 +10,6 @@ import { Categories } from './components/Categories/Categories';
 import { Types } from './components/Types/Types';
 import { Expenses } from './components/Expenses/Expenses';
 import { Incomes } from './components/Incomes/Incomes';
-import { InitService } from './services/initService';
 import { ErrorBoundary } from './components/Debug/ErrorBoundary';
 
 const theme = createTheme(
