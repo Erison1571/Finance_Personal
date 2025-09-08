@@ -11,7 +11,8 @@ import {
   Select,
   MenuItem,
   Box,
-  IconButton
+  IconButton,
+  Input
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Edit as EditIcon } from '@mui/icons-material';
 import type { Category, CategoryFormData } from '../../types';
@@ -33,19 +34,22 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
 }) => {
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
+    color: '#1976d2',
     kind: 'Despesa'
   });
-  const [errors, setErrors] = useState<{ name?: string; kind?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; color?: string; kind?: string }>({});
 
   useEffect(() => {
     if (category && isEdit) {
       setFormData({
         name: category.name,
+        color: category.color,
         kind: category.kind
       });
     } else {
       setFormData({
         name: '',
+        color: '#1976d2',
         kind: 'Despesa'
       });
     }
@@ -53,12 +57,16 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
   }, [category, isEdit, open]);
 
   const validateForm = (): boolean => {
-    const newErrors: { name?: string; kind?: string } = {};
+    const newErrors: { name?: string; color?: string; kind?: string } = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Nome é obrigatório';
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Nome deve ter pelo menos 2 caracteres';
+    }
+
+    if (!formData.color) {
+      newErrors.color = 'Cor é obrigatória';
     }
 
     if (!formData.kind) {
@@ -73,6 +81,7 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
     if (validateForm()) {
       onSave({
         name: formData.name.trim(),
+        color: formData.color,
         kind: formData.kind
       });
     }
@@ -111,6 +120,27 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
             helperText={errors.name}
             autoFocus
           />
+
+          <Box>
+            <InputLabel>Cor da Categoria</InputLabel>
+            <Box display="flex" alignItems="center" gap={2} mt={1}>
+              <Input
+                type="color"
+                value={formData.color}
+                onChange={(e) => handleChange('color', e.target.value)}
+                sx={{ width: 60, height: 40 }}
+                error={!!errors.color}
+              />
+              <TextField
+                fullWidth
+                value={formData.color}
+                onChange={(e) => handleChange('color', e.target.value)}
+                error={!!errors.color}
+                helperText={errors.color}
+                placeholder="#1976d2"
+              />
+            </Box>
+          </Box>
           
           <FormControl fullWidth error={!!errors.kind}>
             <InputLabel>Tipo</InputLabel>

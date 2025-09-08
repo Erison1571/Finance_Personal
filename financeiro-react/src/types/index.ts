@@ -3,11 +3,13 @@ export type Kind = 'Despesa' | 'Receita';
 export interface Category {
   id: string;
   name: string;
+  color: string;
   kind: Kind;
 }
 
 export interface CategoryFormData {
   name: string;
+  color: string;
   kind: Kind;
 }
 

@@ -37,16 +37,16 @@ export class InitService {
 
   private static initializeCategories(): void {
     const categories = [
-      { name: 'Moradia', kind: 'Despesa' as Kind },
-      { name: 'Transporte', kind: 'Despesa' as Kind },
-      { name: 'Alimentação', kind: 'Despesa' as Kind },
-      { name: 'Saúde', kind: 'Despesa' as Kind },
-      { name: 'Educação', kind: 'Despesa' as Kind },
-      { name: 'Lazer', kind: 'Despesa' as Kind },
-      { name: 'Salário', kind: 'Receita' as Kind },
-      { name: 'Freelance', kind: 'Receita' as Kind },
-      { name: 'Investimentos', kind: 'Receita' as Kind },
-      { name: 'Outros', kind: 'Receita' as Kind }
+      { name: 'Moradia', color: '#f44336', kind: 'Despesa' as Kind },
+      { name: 'Transporte', color: '#ff9800', kind: 'Despesa' as Kind },
+      { name: 'Alimentação', color: '#4caf50', kind: 'Despesa' as Kind },
+      { name: 'Saúde', color: '#2196f3', kind: 'Despesa' as Kind },
+      { name: 'Educação', color: '#9c27b0', kind: 'Despesa' as Kind },
+      { name: 'Lazer', color: '#e91e63', kind: 'Despesa' as Kind },
+      { name: 'Salário', color: '#4caf50', kind: 'Receita' as Kind },
+      { name: 'Freelance', color: '#ff9800', kind: 'Receita' as Kind },
+      { name: 'Investimentos', color: '#2196f3', kind: 'Receita' as Kind },
+      { name: 'Outros', color: '#607d8b', kind: 'Receita' as Kind }
     ];
 
     categories.forEach(category => {
