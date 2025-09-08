@@ -27,7 +27,7 @@ export class ExpensesService {
   static getByMonth(monthYear: string): Expense[] {
     const expenses = this.getAll();
     return expenses.filter(expense => 
-      expense.datePrevista.startsWith(monthYear)
+      expense.datePrevista && expense.datePrevista.startsWith(monthYear)
     );
   }
 

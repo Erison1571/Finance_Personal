@@ -27,7 +27,7 @@ export class IncomesService {
   static getByMonth(monthYear: string): Income[] {
     const incomes = this.getAll();
     return incomes.filter(income => 
-      income.datePrevista.startsWith(monthYear)
+      income.datePrevista && income.datePrevista.startsWith(monthYear)
     );
   }
 

@@ -191,7 +191,9 @@ export const Expenses: React.FC = () => {
   const getAvailableMonths = () => {
     const months = new Set<string>();
     expenses.forEach(expense => {
-      months.add(expense.datePrevista.substring(0, 7)); // YYYY-MM
+      if (expense.datePrevista) {
+        months.add(expense.datePrevista.substring(0, 7)); // YYYY-MM
+      }
     });
     return Array.from(months).sort().reverse();
   };

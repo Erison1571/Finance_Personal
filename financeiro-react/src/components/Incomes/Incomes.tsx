@@ -182,7 +182,9 @@ export const Incomes: React.FC = () => {
   const getAvailableMonths = () => {
     const months = new Set<string>();
     incomes.forEach(income => {
-      months.add(income.datePrevista.substring(0, 7)); // YYYY-MM
+      if (income.datePrevista) {
+        months.add(income.datePrevista.substring(0, 7)); // YYYY-MM
+      }
     });
     return Array.from(months).sort().reverse();
   };
