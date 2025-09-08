@@ -1,0 +1,70 @@
+{
+  "project": {
+    "name": "Moura_Solutions",
+    "description": "Sistema de Controle Financeiro Pessoal",
+    "version": "2.0.0"
+  },
+  "database": {
+    "tables": {
+      "categories": {
+        "count": 10,
+        "sample": {
+          "id": "cat1",
+          "name": "Cuidado e Saúde",
+          "color": "#f44336",
+          "kind": "Despesa",
+          "createdAt": "2025-09-08 17:21:31",
+          "updatedAt": "2025-09-08 17:21:31"
+        }
+      },
+      "types": {
+        "count": 20,
+        "sample": {
+          "id": "type1",
+          "name": "Plano de Saúde",
+          "categoryId": "cat1",
+          "createdAt": "2025-09-08 17:21:31",
+          "updatedAt": "2025-09-08 17:21:31"
+        }
+      },
+      "expenses": {
+        "count": 38,
+        "sample": {
+          "id": "exp1",
+          "kind": "Despesa",
+          "categoryId": "cat1",
+          "typeId": "type1",
+          "value": 408.63,
+          "datePrevista": "2025-09-15",
+          "dateEfetiva": "2025-09-15",
+          "obs": "Plano de Saúde Quality - 2 vidas",
+          "isMensal": 1,
+          "seriesId": "health-2025",
+          "createdAt": "2025-09-08 17:21:31",
+          "updatedAt": "2025-09-08 17:21:31"
+        }
+      },
+      "incomes": {
+        "count": 5,
+        "sample": {
+          "id": "inc1",
+          "kind": "Receita",
+          "categoryId": "cat7",
+          "typeId": "type13",
+          "value": 5000,
+          "datePrevista": "2025-09-05",
+          "dateEfetiva": "2025-09-05",
+          "obs": "Salário setembro",
+          "isMensal": 1,
+          "seriesId": "salary-2025",
+          "createdAt": "2025-09-08 17:21:31",
+          "updatedAt": "2025-09-08 17:21:31"
+        }
+      }
+    }
+  },
+  "migration": {
+    "totalRecords": 73,
+    "generatedAt": "2025-09-08T18:19:51.579Z"
+  }
+}
