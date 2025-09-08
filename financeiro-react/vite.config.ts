@@ -10,6 +10,10 @@ export default defineConfig({
   },
   preview: {
     host: true,
-    port: 4173
+    port: 4173,
+    allowedHosts: [
+      'financeiro-moura-solutions-v3.onrender.com',
+      '.onrender.com'
+    ]
   }
 })
