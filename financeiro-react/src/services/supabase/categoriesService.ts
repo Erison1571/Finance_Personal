@@ -13,7 +13,15 @@ export class SupabaseCategoriesService {
       return [];
     }
 
-    return data || [];
+    // Transformar dados do Supabase para o formato esperado pela aplicação
+    return (data || []).map(category => ({
+      id: category.id,
+      name: category.name,
+      color: category.color,
+      kind: category.kind,
+      createdAt: category.created_at,
+      updatedAt: category.updated_at
+    }));
   }
 
   static async getById(id: string): Promise<any | null> {

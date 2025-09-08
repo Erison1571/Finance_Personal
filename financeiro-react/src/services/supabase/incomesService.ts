@@ -14,7 +14,21 @@ export class SupabaseIncomesService {
       return [];
     }
 
-    return data || [];
+    // Transformar dados do Supabase para o formato esperado pela aplicação
+    return (data || []).map(income => ({
+      id: income.id,
+      kind: income.kind,
+      categoryId: income.category_id,
+      typeId: income.type_id,
+      value: income.value,
+      datePrevista: income.date_prevista,
+      dateEfetiva: income.date_efetiva,
+      obs: income.obs,
+      isMensal: income.is_mensal,
+      seriesId: income.series_id,
+      createdAt: income.created_at,
+      updatedAt: income.updated_at
+    }));
   }
 
   static async getById(id: string): Promise<any | null> {

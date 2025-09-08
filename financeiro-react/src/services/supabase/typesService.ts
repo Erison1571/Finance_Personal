@@ -13,7 +13,14 @@ export class SupabaseTypesService {
       return [];
     }
 
-    return data || [];
+    // Transformar dados do Supabase para o formato esperado pela aplicação
+    return (data || []).map(type => ({
+      id: type.id,
+      name: type.name,
+      categoryId: type.category_id,
+      createdAt: type.created_at,
+      updatedAt: type.updated_at
+    }));
   }
 
   static async getById(id: string): Promise<any | null> {
