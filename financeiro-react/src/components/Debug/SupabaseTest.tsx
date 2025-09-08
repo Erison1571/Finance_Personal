@@ -46,7 +46,7 @@ export const SupabaseTest: React.FC = () => {
       });
     } catch (error) {
       setTestResult({
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     } finally {
       setLoading(false);
