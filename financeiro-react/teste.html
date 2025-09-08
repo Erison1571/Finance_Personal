@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Controle Financeiro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e3f2fd;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1976d2;
+            text-align: center;
+        }
+        .status {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #4caf50;
+            margin: 20px 0;
+        }
+        .info {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #ff9800;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Controle Financeiro Pessoal</h1>
+        
+        <div class="status">
+            <h2>✅ Teste de Funcionamento</h2>
+            <p><strong>Status:</strong> Página HTML estática funcionando</p>
+            <p><strong>Data:</strong> <span id="data"></span></p>
+            <p><strong>Hora:</strong> <span id="hora"></span></p>
+        </div>
+        
+        <div class="info">
+            <h3>🔧 Diagnóstico</h3>
+            <p>Se você está vendo esta página, o servidor web está funcionando.</p>
+            <p>O problema pode estar no React ou na compilação.</p>
+        </div>
+        
+        <div class="info">
+            <h3>📋 Próximos Passos</h3>
+            <ul>
+                <li>Verificar se o React está compilando corretamente</li>
+                <li>Verificar console do navegador para erros</li>
+                <li>Testar acessar localhost:5174</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('data').textContent = new Date().toLocaleDateString('pt-BR');
+        document.getElementById('hora').textContent = new Date().toLocaleTimeString('pt-BR');
+    </script>
+</body>
+</html>

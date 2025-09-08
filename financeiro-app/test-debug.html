@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Debug - Controle Financeiro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-title { font-weight: bold; color: #1976d2; margin-bottom: 10px; }
+        .debug-content { background: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; }
+        .test-button { background: #1976d2; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .test-button:hover { background: #1565c0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste Debug - Controle Financeiro</h1>
+    
+    <div class="debug-section">
+        <div class="debug-title">📊 Dados do LocalStorage</div>
+        <button class="test-button" onclick="showLocalStorageData()">Mostrar Dados do LocalStorage</button>
+        <button class="test-button" onclick="clearLocalStorage()">Limpar LocalStorage</button>
+        <button class="test-button" onclick="initializeSampleData()">Inicializar Dados de Exemplo</button>
+        <div id="localStorageOutput" class="debug-content"></div>
+    </div>
+
+    <div class="debug-section">
+        <div class="debug-title">🧪 Teste da Função isItemOpen</div>
+        <button class="test-button" onclick="testIsItemOpen()">Testar Função isItemOpen</button>
+        <div id="testOutput" class="debug-content"></div>
+    </div>
+
+    <div class="debug-section">
+        <div class="debug-title">🔧 Verificar Condições</div>
+        <button class="test-button" onclick="checkConditions()">Verificar Condições</button>
+        <div id="conditionsOutput" class="debug-content"></div>
+    </div>
+
+    <script>
+        function showLocalStorageData() {
+            const output = document.getElementById('localStorageOutput');
+            const data = {};
+            
+            // Verificar todas as chaves do LocalStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) {
+                    try {
+                        data[key] = JSON.parse(localStorage.getItem(key) || '[]');
+                    } catch (e) {
+                        data[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            output.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+
+        function clearLocalStorage() {
+            localStorage.clear();
+            document.getElementById('localStorageOutput').innerHTML = 'LocalStorage limpo!';
+        }
+
+        function initializeSampleData() {
+            // Dados de exemplo para teste
+            const sampleData = {
+                categories: [
+                    { id: '1', name: 'Moradia', kind: 'expense', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '2', name: 'Transporte', kind: 'expense', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '3', name: 'Salário', kind: 'income', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                ],
+                types: [
+                    { id: '1', name: 'Conta de Luz', kind: 'expense', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '2', name: 'Aluguel', kind: 'expense', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '3', name: 'Cartão Cidadão (Passagem)', kind: 'expense', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '4', name: 'Zello Tecnologia', kind: 'income', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                ],
+                expenses: [
+                    { id: '1', description: 'Conta de Luz', amount: 100, dateExpected: '2025-08-29', dateEffective: null, categoryId: '1', typeId: '1', observation: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '2', description: 'Aluguel', amount: 1000, dateExpected: '2025-08-10', dateEffective: '2025-08-06', categoryId: '1', typeId: '2', observation: 'Aluguel mensal', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '3', description: 'Recarga de Cartão Cidadão', amount: 252, dateExpected: '2025-08-10', dateEffective: '2025-08-06', categoryId: '2', typeId: '3', observation: 'Recarga de Cartão Cidadão', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                ],
+                incomes: [
+                    { id: '1', description: 'Salário', amount: 150, dateExpected: '2025-08-30', dateEffective: null, categoryId: '3', typeId: '4', observation: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                    { id: '2', description: 'Salário', amount: 15000, dateExpected: '2025-08-10', dateEffective: '2025-08-06', categoryId: '3', typeId: '4', observation: 'Salário Erison', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                ]
+            };
+
+            // Salvar no LocalStorage
+            Object.keys(sampleData).forEach(key => {
+                localStorage.setItem(key, JSON.stringify(sampleData[key]));
+            });
+
+            document.getElementById('localStorageOutput').innerHTML = 'Dados de exemplo inicializados!';
+        }
+
+        function testIsItemOpen() {
+            const output = document.getElementById('testOutput');
+            const testCases = [
+                { description: 'Teste 1: dateEffective = null', dateEffective: null },
+                { description: 'Teste 2: dateEffective = ""', dateEffective: "" },
+                { description: 'Teste 3: dateEffective = "-"', dateEffective: "-" },
+                { description: 'Teste 4: dateEffective = "null"', dateEffective: "null" },
+                { description: 'Teste 5: dateEffective = "undefined"', dateEffective: "undefined" },
+                { description: 'Teste 6: dateEffective = "2025-08-06"', dateEffective: "2025-08-06" }
+            ];
+
+            let results = '';
+            testCases.forEach(test => {
+                const result = isItemOpen(test.dateEffective);
+                results += `${test.description}: ${result}\n`;
+            });
+
+            output.innerHTML = '<pre>' + results + '</pre>';
+        }
+
+        function isItemOpen(dateEffective) {
+            return !dateEffective || 
+                   dateEffective === '' || 
+                   dateEffective === '-' ||
+                   dateEffective === 'null' ||
+                   dateEffective === 'undefined';
+        }
+
+        function checkConditions() {
+            const output = document.getElementById('conditionsOutput');
+            const testCases = [
+                { description: 'Teste 1: dateEffective = null', dateEffective: null },
+                { description: 'Teste 2: dateEffective = ""', dateEffective: "" },
+                { description: 'Teste 3: dateEffective = "-"', dateEffective: "-" },
+                { description: 'Teste 4: dateEffective = "null"', dateEffective: "null" },
+                { description: 'Teste 5: dateEffective = "undefined"', dateEffective: "undefined" },
+                { description: 'Teste 6: dateEffective = "2025-08-06"', dateEffective: "2025-08-06" }
+            ];
+
+            let results = '';
+            testCases.forEach(test => {
+                const condition1 = !test.dateEffective;
+                const condition2 = test.dateEffective === '';
+                const condition3 = test.dateEffective === '-';
+                const condition4 = test.dateEffective === 'null';
+                const condition5 = test.dateEffective === 'undefined';
+                const finalResult = condition1 || condition2 || condition3 || condition4 || condition5;
+
+                results += `${test.description}:\n`;
+                results += `  !dateEffective: ${condition1}\n`;
+                results += `  === "": ${condition2}\n`;
+                results += `  === "-": ${condition3}\n`;
+                results += `  === "null": ${condition4}\n`;
+                results += `  === "undefined": ${condition5}\n`;
+                results += `  RESULTADO FINAL: ${finalResult}\n\n`;
+            });
+
+            output.innerHTML = '<pre>' + results + '</pre>';
+        }
+
+        // Executar quando a página carregar
+        window.onload = function() {
+            showLocalStorageData();
+        };
+    </script>
+</body>
+</html>

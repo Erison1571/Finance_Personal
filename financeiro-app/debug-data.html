@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug LocalStorage</title>
+</head>
+<body>
+    <h1>Debug LocalStorage - Controle Financeiro</h1>
+    <div id="output"></div>
+    
+    <script>
+        function showLocalStorageData() {
+            const output = document.getElementById('output');
+            const data = {};
+            
+            // Verificar todas as chaves do LocalStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) {
+                    try {
+                        data[key] = JSON.parse(localStorage.getItem(key) || '[]');
+                    } catch (e) {
+                        data[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            output.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+        
+        // Executar quando a página carregar
+        window.onload = showLocalStorageData;
+    </script>
+</body>
+</html>

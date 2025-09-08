@@ -1,0 +1,80 @@
+========================================
+    CONTROLE FINANCEIRO - REACT APP
+========================================
+
+COMO EXECUTAR A APLICAÇÃO:
+
+OPÇÃO 1 - Arquivo BAT Automático:
+1. Clique duas vezes em "start-server.bat"
+2. Aguarde o servidor inicializar (5 segundos)
+3. O navegador abrirá automaticamente
+4. URL: http://localhost:5173
+
+OPÇÃO 2 - Arquivo BAT Simples:
+1. Clique duas vezes em "start-simple.bat"
+2. Aguarde o servidor inicializar
+3. Abra o navegador manualmente em: http://localhost:5173
+
+OPÇÃO 3 - Linha de Comando:
+1. Abra o PowerShell/CMD
+2. Navegue para esta pasta: cd "C:\Users\User\Documents\Projetos\Controle_Financeiro\financeiro-react"
+3. Execute: npm run dev
+4. Abra o navegador em: http://localhost:5173
+
+========================================
+FEATURES IMPLEMENTADAS:
+
+✅ Sprint 1 - Categorias
+- CRUD completo com tela dividida
+- Filtros por vínculo e categoria
+- Tela dividida: Despesas | Receitas
+
+✅ Sprint 2 - Tipos
+- CRUD completo com vínculo dinâmico
+- Tela dividida: Despesas | Receitas
+- Integridade referencial com categorias
+
+========================================
+NAVEGAÇÃO:
+
+- / (Dashboard) - Página inicial
+- /categorias - Gerenciar categorias
+- /tipos - Gerenciar tipos
+- /despesas - Em desenvolvimento
+- /receitas - Em desenvolvimento
+
+========================================
+TECNOLOGIAS:
+
+- React 18 + TypeScript
+- Material-UI (MUI)
+- Vite (Build tool)
+- LocalStorage (Persistência)
+- React Router (Navegação)
+
+========================================
+PROBLEMAS COMUNS:
+
+1. Porta 5173 ocupada:
+   - Feche outros terminais
+   - Reinicie o computador
+   - Use: netstat -ano | findstr :5173
+
+2. Dependências não instaladas:
+   - Execute: npm install
+   - Verifique se Node.js está instalado
+
+3. Erro de compilação:
+   - Execute: npm run build
+   - Verifique os logs de erro
+
+========================================
+SUPORTE:
+
+Se houver problemas, verifique:
+1. Node.js instalado (versão 16+)
+2. NPM funcionando
+3. Porta 5173 livre
+4. Dependências instaladas
+
+========================================

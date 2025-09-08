@@ -1,0 +1,51 @@
+========================================
+    COMO USAR OS ARQUIVOS .BAT
+========================================
+
+ARQUIVOS DISPONÍVEIS:
+=====================
+
+1. controle-financeiro.bat (PRINCIPAL)
+   - Menu interativo com todas as opções
+   - Execute este arquivo para começar
+   - Duplo clique no arquivo para abrir
+
+2. start-server.bat
+   - Inicia o servidor de desenvolvimento
+   - Instala dependências automaticamente se necessário
+   - Abre na porta 5174
+
+3. stop-server.bat
+   - Para o servidor em execução
+   - Mata processos nas portas 5173 e 5174
+
+4. build-and-deploy.bat
+   - Compila a aplicação para produção
+   - Cria pasta 'dist' com arquivos otimizados
+
+5. start-simple.bat (LEGADO)
+   - Versão simples do start-server.bat
+
+COMO USAR:
+==========
+
+1. Navegue até a pasta financeiro-react
+2. Execute controle-financeiro.bat (duplo clique)
+3. Escolha a opção desejada no menu
+4. Siga as instruções na tela
+
+IMPORTANTE:
+===========
+- Use sempre a porta 5174 (não 5173)
+- Acesse: http://localhost:5174
+- Pressione Ctrl+C para parar o servidor
+- Mantenha o terminal aberto enquanto o servidor estiver rodando
+
+SOLUÇÃO DE PROBLEMAS:
+=====================
+- Se der erro de porta em uso: execute stop-server.bat
+- Se der erro de dependências: execute opção 4 (Instalar)
+- Se a tela ficar branca: verifique se está na porta 5174
+- Se não funcionar: execute build-and-deploy.bat primeiro
+
+========================================

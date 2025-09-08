@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Dados - Controle Financeiro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .data-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .data-count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .no-data {
+            color: #f44336;
+        }
+        .has-data {
+            color: #4caf50;
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificação de Dados - Controle Financeiro</h1>
+        
+        <div class="data-section">
+            <h3>📊 Status dos Dados</h3>
+            <div id="status"></div>
+        </div>
+
+        <div class="data-section">
+            <h3>📋 Categorias</h3>
+            <div id="categories"></div>
+        </div>
+
+        <div class="data-section">
+            <h3>🏷️ Tipos</h3>
+            <div id="types"></div>
+        </div>
+
+        <div class="data-section">
+            <h3>💸 Despesas</h3>
+            <div id="expenses"></div>
+        </div>
+
+        <div class="data-section">
+            <h3>💰 Receitas</h3>
+            <div id="incomes"></div>
+        </div>
+
+        <div class="data-section">
+            <h3>🛠️ Ações</h3>
+            <button onclick="exportData()">📤 Exportar Dados</button>
+            <button onclick="clearData()">🗑️ Limpar Dados</button>
+            <button onclick="loadData()">🔄 Recarregar</button>
+        </div>
+
+        <div class="data-section">
+            <h3>📄 Dados Completos (JSON)</h3>
+            <pre id="jsonData"></pre>
+        </div>
+    </div>
+
+    <script>
+        function loadData() {
+            // Verificar dados no localStorage
+            const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+            const types = JSON.parse(localStorage.getItem('types') || '[]');
+            const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            const incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+
+            // Atualizar status
+            const statusDiv = document.getElementById('status');
+            const totalItems = categories.length + types.length + expenses.length + incomes.length;
+            
+            if (totalItems > 0) {
+                statusDiv.innerHTML = `<div class="data-count has-data">✅ Dados encontrados: ${totalItems} itens</div>`;
+            } else {
+                statusDiv.innerHTML = `<div class="data-count no-data">❌ Nenhum dado encontrado</div>`;
+            }
+
+            // Atualizar seções
+            document.getElementById('categories').innerHTML = 
+                `<div class="data-count ${categories.length > 0 ? 'has-data' : 'no-data'}">${categories.length} categorias</div>`;
+            
+            document.getElementById('types').innerHTML = 
+                `<div class="data-count ${types.length > 0 ? 'has-data' : 'no-data'}">${types.length} tipos</div>`;
+            
+            document.getElementById('expenses').innerHTML = 
+                `<div class="data-count ${expenses.length > 0 ? 'has-data' : 'no-data'}">${expenses.length} despesas</div>`;
+            
+            document.getElementById('incomes').innerHTML = 
+                `<div class="data-count ${incomes.length > 0 ? 'has-data' : 'no-data'}">${incomes.length} receitas</div>`;
+
+            // Mostrar dados JSON
+            const allData = {
+                categories,
+                types,
+                expenses,
+                incomes,
+                timestamp: new Date().toISOString()
+            };
+            document.getElementById('jsonData').textContent = JSON.stringify(allData, null, 2);
+        }
+
+        function exportData() {
+            const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+            const types = JSON.parse(localStorage.getItem('types') || '[]');
+            const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            const incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+
+            const allData = {
+                categories,
+                types,
+                expenses,
+                incomes,
+                timestamp: new Date().toISOString(),
+                version: '1.0.0'
+            };
+
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `controle-financeiro-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function clearData() {
+            if (confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita!')) {
+                localStorage.removeItem('categories');
+                localStorage.removeItem('types');
+                localStorage.removeItem('expenses');
+                localStorage.removeItem('incomes');
+                loadData();
+                alert('Dados limpos com sucesso!');
+            }
+        }
+
+        // Carregar dados ao abrir a página
+        loadData();
+    </script>
+</body>
+</html>
