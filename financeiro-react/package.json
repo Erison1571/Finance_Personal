@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "start": "node server.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "migrate": "tsc -p tsconfig.database.json && node scripts/migrate-to-database.js",
@@ -28,6 +29,7 @@
     "@mui/x-data-grid": "^8.10.2",
     "@supabase/supabase-js": "^2.57.2",
     "@types/pg": "^8.15.5",
+    "express": "^5.1.0",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
     "pg": "^8.16.3",
