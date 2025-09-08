@@ -1,5 +1,5 @@
 -- Script de migração para Supabase
--- Gerado automaticamente em 2025-09-08T18:19:51.575Z
+-- Gerado automaticamente em 2025-09-08T20:55:09.279Z
 
 -- Criar tabelas
 CREATE TABLE IF NOT EXISTS categories (

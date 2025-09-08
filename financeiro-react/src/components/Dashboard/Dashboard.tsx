@@ -42,10 +42,10 @@ import {
   Cell
 } from 'recharts';
 import type { Expense, Income } from '../../types';
-import { CategoriesService } from '../../services/categoriesService';
-import { TypesService } from '../../services/typesService';
-import { ExpensesService } from '../../services/expensesService';
-import { IncomesService } from '../../services/incomesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
+import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
+import { SupabaseExpensesService as ExpensesService } from '../../services/supabase/expensesService';
+import { SupabaseIncomesService as IncomesService } from '../../services/supabase/incomesService';
 import { formatBRL } from '../../utils/currency.util';
 import { formatMonthYear, formatDateBR } from '../../utils/date.util';
 import { EffectiveDialog } from '../Common/EffectiveDialog';
@@ -108,50 +108,54 @@ export const Dashboard: React.FC = () => {
   const COLORS = ['#1976d2', '#dc004e', '#2e7d32', '#f57c00', '#9c27b0'];
 
   useEffect(() => {
-    loadDashboardData();
-    loadAvailableMonths();
-    loadOpenItems();
-    loadExpenseCategoriesData();
+    const loadAllData = async () => {
+      await loadDashboardData();
+      await loadAvailableMonths();
+      await loadOpenItems();
+      await loadExpenseCategoriesData();
+    };
+    loadAllData();
   }, [selectedMonth]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      loadDashboardData();
-      loadOpenItems();
-      loadExpenseCategoriesData();
+    const interval = setInterval(async () => {
+      await loadDashboardData();
+      await loadOpenItems();
+      await loadExpenseCategoriesData();
     }, 5000);
 
     return () => clearInterval(interval);
   }, [selectedMonth]);
 
     
-  const loadDashboardData = () => {
-    const expenses = ExpensesService.getAll();
-    const incomes = IncomesService.getAll();
-    
-    const [year, month] = selectedMonth.split('-').map(Number);
-    
-    const monthExpenses = expenses.filter(expense => {
-      const expenseDate = new Date(expense.datePrevista);
-      return expenseDate.getFullYear() === year && expenseDate.getMonth() + 1 === month;
-    });
-    
-    const monthIncomes = incomes.filter(income => {
-      const incomeDate = new Date(income.datePrevista);
-      return incomeDate.getFullYear() === year && incomeDate.getMonth() + 1 === month;
-    });
+  const loadDashboardData = async () => {
+    try {
+      const expenses = await ExpensesService.getAll();
+      const incomes = await IncomesService.getAll();
+      
+      const [year, month] = selectedMonth.split('-').map(Number);
+      
+      const monthExpenses = expenses.filter(expense => {
+        const expenseDate = new Date(expense.datePrevista);
+        return expenseDate.getFullYear() === year && expenseDate.getMonth() + 1 === month;
+      });
+      
+      const monthIncomes = incomes.filter(income => {
+        const incomeDate = new Date(income.datePrevista);
+        return incomeDate.getFullYear() === year && incomeDate.getMonth() + 1 === month;
+      });
 
-    const receitasPrevistas = monthIncomes.reduce((sum, income) => sum + income.value, 0);
-    const receitasExecutadas = monthIncomes
-      .filter(income => income.dateEfetiva)
-      .reduce((sum, income) => sum + income.value, 0);
-    
-    const despesasPrevistas = monthExpenses.reduce((sum, expense) => sum + expense.value, 0);
-    const despesasExecutadas = monthExpenses
-      .filter(expense => expense.dateEfetiva)
-      .reduce((sum, expense) => sum + expense.value, 0);
+      const receitasPrevistas = monthIncomes.reduce((sum, income) => sum + income.value, 0);
+      const receitasExecutadas = monthIncomes
+        .filter(income => income.dateEfetiva)
+        .reduce((sum, income) => sum + income.value, 0);
+      
+      const despesasPrevistas = monthExpenses.reduce((sum, expense) => sum + expense.value, 0);
+      const despesasExecutadas = monthExpenses
+        .filter(expense => expense.dateEfetiva)
+        .reduce((sum, expense) => sum + expense.value, 0);
 
-    const diferencaReceitas = receitasPrevistas - receitasExecutadas;
+      const diferencaReceitas = receitasPrevistas - receitasExecutadas;
     const diferencaDespesas = despesasPrevistas - despesasExecutadas;
     const saldoPrevisto = receitasPrevistas - despesasPrevistas;
     const saldoEfetivo = receitasExecutadas - despesasExecutadas;
@@ -168,51 +172,59 @@ export const Dashboard: React.FC = () => {
       saldoEfetivo,
       diferencaSaldo
     });
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+    }
   };
 
-  const loadAvailableMonths = () => {
-    const expenses = ExpensesService.getAll();
-    const incomes = IncomesService.getAll();
-    const allItems = [...expenses, ...incomes];
+  const loadAvailableMonths = async () => {
+    try {
+      const expenses = await ExpensesService.getAll();
+      const incomes = await IncomesService.getAll();
+      const allItems = [...expenses, ...incomes];
     
-    const months = new Set<string>();
-    allItems.forEach(item => {
-      const date = new Date(item.datePrevista);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      months.add(monthKey);
-    });
-    
-    setAvailableMonths(Array.from(months).sort().reverse());
+      const months = new Set<string>();
+      allItems.forEach(item => {
+        const date = new Date(item.datePrevista);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        months.add(monthKey);
+      });
+      
+      setAvailableMonths(Array.from(months).sort().reverse());
+    } catch (error) {
+      console.error('Erro ao carregar meses disponíveis:', error);
+    }
   };
 
-  const loadOpenItems = () => {
-    const expenses = ExpensesService.getAll();
-    const incomes = IncomesService.getAll();
-    const categories = CategoriesService.getAll();
-    const types = TypesService.getAll();
+  const loadOpenItems = async () => {
+    try {
+      const expenses = await ExpensesService.getAll();
+      const incomes = await IncomesService.getAll();
+      const categories = await CategoriesService.getAll();
+      const types = await TypesService.getAll();
     
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const currentDate = new Date();
-    
-    const monthExpenses = expenses.filter(expense => {
-      const expenseDate = new Date(expense.datePrevista);
-      return expenseDate.getFullYear() === year && expenseDate.getMonth() + 1 === month;
-    });
-    
-    const monthIncomes = incomes.filter(income => {
-      const incomeDate = new Date(income.datePrevista);
-      return incomeDate.getFullYear() === year && incomeDate.getMonth() + 1 === month;
-    });
+      const [year, month] = selectedMonth.split('-').map(Number);
+      const currentDate = new Date();
+      
+      const monthExpenses = expenses.filter(expense => {
+        const expenseDate = new Date(expense.datePrevista);
+        return expenseDate.getFullYear() === year && expenseDate.getMonth() + 1 === month;
+      });
+      
+      const monthIncomes = incomes.filter(income => {
+        const incomeDate = new Date(income.datePrevista);
+        return incomeDate.getFullYear() === year && incomeDate.getMonth() + 1 === month;
+      });
 
-    const allExpenses: DashboardItem[] = monthExpenses.map(expense => {
-      const category = categories.find(c => c.id === expense.categoryId);
-      const type = types.find(t => t.id === expense.typeId);
-      const expectedDate = new Date(expense.datePrevista);
-      const isOverdue = !expense.dateEfetiva && expectedDate < currentDate;
-      const isPending = !expense.dateEfetiva;
-      const isEffective = !!expense.dateEfetiva && expense.dateEfetiva !== '';
+      const allExpenses: DashboardItem[] = monthExpenses.map(expense => {
+        const category = categories.find(c => c.id === expense.categoryId);
+        const type = types.find(t => t.id === expense.typeId);
+        const expectedDate = new Date(expense.datePrevista);
+        const isOverdue = !expense.dateEfetiva && expectedDate < currentDate;
+        const isPending = !expense.dateEfetiva;
+        const isEffective = !!expense.dateEfetiva && expense.dateEfetiva !== '';
 
-      return {
+        return {
         id: expense.id,
         type: 'expense',
         description: expense.obs || `${category?.name || 'Categoria'} - ${type?.name || 'Tipo'}`,
@@ -252,44 +264,51 @@ export const Dashboard: React.FC = () => {
       };
     });
 
-    setOpenItems([...allExpenses, ...allIncomes].sort((a, b) => 
-      new Date(a.dateExpected).getTime() - new Date(b.dateExpected).getTime()
-    ));
+      setOpenItems([...allExpenses, ...allIncomes].sort((a, b) => 
+        new Date(a.dateExpected).getTime() - new Date(b.dateExpected).getTime()
+      ));
+    } catch (error) {
+      console.error('Erro ao carregar itens em aberto:', error);
+    }
   };
 
-  const loadExpenseCategoriesData = () => {
-    const expenses = ExpensesService.getAll();
-    const categories = CategoriesService.getAll();
+  const loadExpenseCategoriesData = async () => {
+    try {
+      const expenses = await ExpensesService.getAll();
+      const categories = await CategoriesService.getAll();
     
-    const [year, month] = selectedMonth.split('-').map(Number);
-    
-    const monthExpenses = expenses.filter(expense => {
-      const expenseDate = new Date(expense.datePrevista);
-      return expenseDate.getFullYear() === year && 
-             expenseDate.getMonth() + 1 === month && 
-             expense.dateEfetiva;
-    });
+      const [year, month] = selectedMonth.split('-').map(Number);
+      
+      const monthExpenses = expenses.filter(expense => {
+        const expenseDate = new Date(expense.datePrevista);
+        return expenseDate.getFullYear() === year && 
+               expenseDate.getMonth() + 1 === month && 
+               expense.dateEfetiva;
+      });
 
-    // Dados por categoria
-    const categoryMap = new Map<string, number>();
-    monthExpenses.forEach(expense => {
-      const category = categories.find(c => c.id === expense.categoryId);
-      if (category) {
-        const existing = categoryMap.get(category.name) || 0;
-        categoryMap.set(category.name, existing + expense.value);
+      // Dados por categoria
+      const categoryMap = new Map<string, number>();
+      monthExpenses.forEach(expense => {
+        const category = categories.find(c => c.id === expense.categoryId);
+        if (category) {
+          const existing = categoryMap.get(category.name) || 0;
+          categoryMap.set(category.name, existing + expense.value);
       }
     });
 
-    const categoriesData: ChartData[] = Array.from(categoryMap.entries())
-      .map(([name, value], index) => ({
-        name,
-        value,
-        color: COLORS[index % COLORS.length]
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
+      const categoriesData: ChartData[] = Array.from(categoryMap.entries())
+        .map(([name, value], index) => ({
+          name,
+          value,
+          color: COLORS[index % COLORS.length]
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
 
-    setExpenseCategoriesData(categoriesData);
+      setExpenseCategoriesData(categoriesData);
+    } catch (error) {
+      console.error('Erro ao carregar dados de categorias:', error);
+    }
   };
 
   const handleMonthChange = (event: any) => {
@@ -297,10 +316,10 @@ export const Dashboard: React.FC = () => {
   };
 
 
-  const handleRefresh = () => {
-    loadDashboardData();
-    loadOpenItems();
-    loadExpenseCategoriesData();
+  const handleRefresh = async () => {
+    await loadDashboardData();
+    await loadOpenItems();
+    await loadExpenseCategoriesData();
   };
 
   const handleApproveClick = (item: DashboardItem) => {
@@ -313,25 +332,25 @@ export const Dashboard: React.FC = () => {
     setApprovingItem(null);
   };
 
-  const handleApproveSave = (data: { valueEffective: number; dateEffective: string; obs?: string }) => {
+  const handleApproveSave = async (data: { valueEffective: number; dateEffective: string; obs?: string }) => {
     if (approvingItem) {
       if (approvingItem.type === 'expense') {
-        ExpensesService.update(approvingItem.item.id, {
+        await ExpensesService.update(approvingItem.item.id, {
           ...approvingItem.item.item as Expense,
           dateEfetiva: data.dateEffective,
           obs: data.obs || approvingItem.item.item.obs
         });
-    } else {
-        IncomesService.update(approvingItem.item.id, {
+      } else {
+        await IncomesService.update(approvingItem.item.id, {
           ...approvingItem.item.item as Income,
           dateEfetiva: data.dateEffective,
           obs: data.obs || approvingItem.item.item.obs
         });
       }
       
-      loadDashboardData();
-      loadOpenItems();
-      loadExpenseCategoriesData();
+      await loadDashboardData();
+      await loadOpenItems();
+      await loadExpenseCategoriesData();
     }
     handleApproveClose();
   };
@@ -341,17 +360,21 @@ export const Dashboard: React.FC = () => {
     console.log('Edit item:', item);
   };
 
-  const handleDeleteClick = (item: DashboardItem) => {
+  const handleDeleteClick = async (item: DashboardItem) => {
     if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
-      if (item.type === 'expense') {
-        ExpensesService.delete(item.id);
-    } else {
-        IncomesService.delete(item.id);
+      try {
+        if (item.type === 'expense') {
+          await ExpensesService.delete(item.id);
+        } else {
+          await IncomesService.delete(item.id);
+        }
+        
+        await loadDashboardData();
+        await loadOpenItems();
+        await loadExpenseCategoriesData();
+      } catch (error) {
+        console.error('Erro ao excluir lançamento:', error);
       }
-      
-      loadDashboardData();
-      loadOpenItems();
-      loadExpenseCategoriesData();
     }
   };
 

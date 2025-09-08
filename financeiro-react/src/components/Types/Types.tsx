@@ -27,8 +27,8 @@ import {
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import type { Type, TypeFormData, Kind, Category } from '../../types';
-import { TypesService } from '../../services/typesService';
-import { CategoriesService } from '../../services/categoriesService';
+import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
 import { TypeDialog } from './TypeDialog';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
 
@@ -62,11 +62,20 @@ export const Types: React.FC = () => {
     }
   }, [selectedKind]);
 
-  const loadData = () => {
-    const allTypes = TypesService.getAll();
-    const allCategories = CategoriesService.getAll();
-    setTypes(allTypes);
-    setCategories(allCategories);
+  const loadData = async () => {
+    try {
+      const allTypes = await TypesService.getAll();
+      const allCategories = await CategoriesService.getAll();
+      setTypes(allTypes);
+      setCategories(allCategories);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao carregar dados',
+        severity: 'error'
+      });
+    }
   };
 
   const getFilteredTypes = (kind: Kind) => {
@@ -116,27 +125,32 @@ export const Types: React.FC = () => {
     setIsEdit(false);
   };
 
-  const handleSaveType = (typeData: TypeFormData) => {
-    let success = false;
-    
-    if (isEdit && editingType) {
-      const updated = TypesService.update(editingType.id, typeData);
-      success = updated !== null;
-      if (success) {
-        showSnackbar('Tipo atualizado com sucesso!', 'success');
+  const handleSaveType = async (typeData: TypeFormData) => {
+    try {
+      let success = false;
+      
+      if (isEdit && editingType) {
+        const updated = await TypesService.update(editingType.id, typeData);
+        success = updated !== null;
+        if (success) {
+          showSnackbar('Tipo atualizado com sucesso!', 'success');
+        }
+      } else {
+        const created = await TypesService.create(typeData);
+        success = created !== null;
+        if (success) {
+          showSnackbar('Tipo criado com sucesso!', 'success');
+        }
       }
-    } else {
-      const created = TypesService.create(typeData);
-      success = created !== null;
-      if (success) {
-        showSnackbar('Tipo criado com sucesso!', 'success');
-      }
-    }
 
-    if (success) {
-      loadData();
-      handleCloseDialog();
-    } else {
+      if (success) {
+        await loadData();
+        handleCloseDialog();
+      } else {
+        showSnackbar('Erro ao salvar tipo!', 'error');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar tipo:', error);
       showSnackbar('Erro ao salvar tipo!', 'error');
     }
   };
@@ -146,13 +160,18 @@ export const Types: React.FC = () => {
     setConfirmDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingType) {
-      const success = TypesService.delete(deletingType.id);
-      if (success) {
-        showSnackbar('Tipo excluído com sucesso!', 'success');
-        loadData();
-      } else {
+      try {
+        const success = await TypesService.delete(deletingType.id);
+        if (success) {
+          showSnackbar('Tipo excluído com sucesso!', 'success');
+          await loadData();
+        } else {
+          showSnackbar('Erro ao excluir tipo!', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir tipo:', error);
         showSnackbar('Erro ao excluir tipo!', 'error');
       }
     }

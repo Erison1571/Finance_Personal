@@ -19,8 +19,8 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Edit as EditIcon } from '@mui/icons-material';
 import type { Income, IncomeFormData, Category, Type } from '../../types';
-import { CategoriesService } from '../../services/categoriesService';
-import { TypesService } from '../../services/typesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
+import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
 import { formatBRL, reaisToCentavos } from '../../utils/currency.util';
 
 interface IncomeDialogProps {
@@ -83,30 +83,44 @@ export const IncomeDialog: React.FC<IncomeDialogProps> = ({
   }, [income, isEdit, open]);
 
   useEffect(() => {
-    loadCategories();
+    const loadData = async () => {
+      await loadCategories();
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
-    if (formData.categoryId) {
-      loadTypes();
-    } else {
-      setTypes([]);
-      setFormData(prev => ({ ...prev, typeId: '' }));
-    }
+    const loadTypesData = async () => {
+      if (formData.categoryId) {
+        await loadTypes();
+      } else {
+        setTypes([]);
+        setFormData(prev => ({ ...prev, typeId: '' }));
+      }
+    };
+    loadTypesData();
   }, [formData.categoryId]);
 
-  const loadCategories = () => {
-    const allCategories = CategoriesService.getAll();
-    const incomeCategories = allCategories.filter(cat => cat.kind === 'Receita');
-    setCategories(incomeCategories);
+  const loadCategories = async () => {
+    try {
+      const allCategories = await CategoriesService.getAll();
+      const incomeCategories = allCategories.filter(cat => cat.kind === 'Receita');
+      setCategories(incomeCategories);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+    }
   };
 
-  const loadTypes = () => {
-    const allTypes = TypesService.getAll();
-    const incomeTypes = allTypes.filter(type => 
-      type.kind === 'Receita' && type.categoryId === formData.categoryId
-    );
-    setTypes(incomeTypes);
+  const loadTypes = async () => {
+    try {
+      const allTypes = await TypesService.getAll();
+      const incomeTypes = allTypes.filter(type => 
+        type.kind === 'Receita' && type.categoryId === formData.categoryId
+      );
+      setTypes(incomeTypes);
+    } catch (error) {
+      console.error('Erro ao carregar tipos:', error);
+    }
   };
 
   const validateForm = (): boolean => {

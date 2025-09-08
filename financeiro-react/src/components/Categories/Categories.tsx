@@ -26,7 +26,7 @@ import {
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import type { Category, CategoryFormData, Kind } from '../../types';
-import { CategoriesService } from '../../services/categoriesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
 import { CategoryDialog } from './CategoryDialog';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
 
@@ -59,9 +59,18 @@ export const Categories: React.FC = () => {
     }
   }, [selectedKind]);
 
-  const loadCategories = () => {
-    const allCategories = CategoriesService.getAll();
-    setCategories(allCategories);
+  const loadCategories = async () => {
+    try {
+      const allCategories = await CategoriesService.getAll();
+      setCategories(allCategories);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao carregar categorias',
+        severity: 'error'
+      });
+    }
   };
 
   const getFilteredCategories = (kind: Kind) => {
@@ -99,27 +108,32 @@ export const Categories: React.FC = () => {
     setIsEdit(false);
   };
 
-  const handleSaveCategory = (categoryData: CategoryFormData) => {
-    let success = false;
-    
-    if (isEdit && editingCategory) {
-      const updated = CategoriesService.update(editingCategory.id, categoryData);
-      success = updated !== null;
-      if (success) {
-        showSnackbar('Categoria atualizada com sucesso!', 'success');
+  const handleSaveCategory = async (categoryData: CategoryFormData) => {
+    try {
+      let success = false;
+      
+      if (isEdit && editingCategory) {
+        const updated = await CategoriesService.update(editingCategory.id, categoryData);
+        success = updated !== null;
+        if (success) {
+          showSnackbar('Categoria atualizada com sucesso!', 'success');
+        }
+      } else {
+        const created = await CategoriesService.create(categoryData);
+        success = created !== null;
+        if (success) {
+          showSnackbar('Categoria criada com sucesso!', 'success');
+        }
       }
-    } else {
-      const created = CategoriesService.create(categoryData);
-      success = created !== null;
-      if (success) {
-        showSnackbar('Categoria criada com sucesso!', 'success');
-      }
-    }
 
-    if (success) {
-      loadCategories();
-      handleCloseDialog();
-    } else {
+      if (success) {
+        await loadCategories();
+        handleCloseDialog();
+      } else {
+        showSnackbar('Erro ao salvar categoria!', 'error');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar categoria:', error);
       showSnackbar('Erro ao salvar categoria!', 'error');
     }
   };
@@ -129,13 +143,18 @@ export const Categories: React.FC = () => {
     setConfirmDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingCategory) {
-      const success = CategoriesService.delete(deletingCategory.id);
-      if (success) {
-        showSnackbar('Categoria excluída com sucesso!', 'success');
-        loadCategories();
-      } else {
+      try {
+        const success = await CategoriesService.delete(deletingCategory.id);
+        if (success) {
+          showSnackbar('Categoria excluída com sucesso!', 'success');
+          await loadCategories();
+        } else {
+          showSnackbar('Erro ao excluir categoria!', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir categoria:', error);
         showSnackbar('Erro ao excluir categoria!', 'error');
       }
     }

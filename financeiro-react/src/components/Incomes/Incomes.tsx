@@ -33,9 +33,9 @@ import {
   ArrowDownward as ArrowDownwardIcon
 } from '@mui/icons-material';
 import type { Income, Category, Type, IncomeFormData } from '../../types';
-import { IncomesService } from '../../services/incomesService';
-import { CategoriesService } from '../../services/categoriesService';
-import { TypesService } from '../../services/typesService';
+import { SupabaseIncomesService as IncomesService } from '../../services/supabase/incomesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
+import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
 import { IncomeDialog } from './IncomeDialog';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
 import { EffectiveDialog } from '../Common/EffectiveDialog';
@@ -87,14 +87,23 @@ export const Incomes: React.FC = () => {
     }
   }, [selectedCategory]);
 
-  const loadData = () => {
-    const allIncomes = IncomesService.getAll();
-    const allCategories = CategoriesService.getAll();
-    const allTypes = TypesService.getAll();
-    
-    setIncomes(allIncomes);
-    setCategories(allCategories.filter(cat => cat.kind === 'Receita'));
-    setTypes(allTypes.filter(type => type.kind === 'Receita'));
+  const loadData = async () => {
+    try {
+      const allIncomes = await IncomesService.getAll();
+      const allCategories = await CategoriesService.getAll();
+      const allTypes = await TypesService.getAll();
+      
+      setIncomes(allIncomes);
+      setCategories(allCategories.filter(cat => cat.kind === 'Receita'));
+      setTypes(allTypes.filter(type => type.kind === 'Receita'));
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao carregar dados',
+        severity: 'error'
+      });
+    }
   };
 
   const getFilteredIncomes = () => {
@@ -186,26 +195,31 @@ export const Incomes: React.FC = () => {
     setDialogOpen(false);
   };
 
-  const handleSaveIncome = (incomeData: any) => {
-    const createdIncomes = IncomesService.create(incomeData);
-    
-    if (createdIncomes.length > 0) {
-      const message = createdIncomes.length === 1 
-        ? 'Receita criada com sucesso!' 
-        : `${createdIncomes.length} receitas mensais criadas com sucesso!`;
+  const handleSaveIncome = async (incomeData: any) => {
+    try {
+      const createdIncomes = await IncomesService.create(incomeData);
       
-      showSnackbar(message, 'success');
-      loadData();
-      handleCloseDialog();
-    } else {
-      showSnackbar('Erro ao criar receita!', 'error');
+      if (createdIncomes.length > 0) {
+        const message = createdIncomes.length === 1 
+          ? 'Receita criada com sucesso!' 
+          : `${createdIncomes.length} receitas mensais criadas com sucesso!`;
+        
+        showSnackbar(message, 'success');
+        await loadData();
+        handleCloseDialog();
+      } else {
+        showSnackbar('Erro ao criar receita!', 'error');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar receita:', error);
+      showSnackbar('Erro ao salvar receita', 'error');
     }
   };
 
-  const handleDeleteClick = (income: Income) => {
+  const handleDeleteClick = async (income: Income) => {
     // Verificar se é uma receita mensal
     if (income.isMensal && income.seriesId) {
-      const series = IncomesService.getBySeries(income.seriesId);
+      const series = await IncomesService.getBySeries(income.seriesId);
       setDeletingSeries({ income, series });
       setDeleteSeriesDialogOpen(true);
     } else {
@@ -214,13 +228,18 @@ export const Incomes: React.FC = () => {
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingIncome) {
-      const success = IncomesService.delete(deletingIncome.id);
-      if (success) {
-        showSnackbar('Receita excluída com sucesso!', 'success');
-        loadData();
-      } else {
+      try {
+        const success = await IncomesService.delete(deletingIncome.id);
+        if (success) {
+          showSnackbar('Receita excluída com sucesso!', 'success');
+          await loadData();
+        } else {
+          showSnackbar('Erro ao excluir receita!', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir receita:', error);
         showSnackbar('Erro ao excluir receita!', 'error');
       }
     }
@@ -228,29 +247,34 @@ export const Incomes: React.FC = () => {
     setDeletingIncome(undefined);
   };
 
-  const handleDeleteSeries = (deleteAll: boolean) => {
+  const handleDeleteSeries = async (deleteAll: boolean) => {
     if (deletingSeries) {
-      let success = false;
-      
-      if (deleteAll) {
-        // Excluir toda a série
-        success = IncomesService.deleteBySeries(deletingSeries.income.seriesId!);
-        if (success) {
-          showSnackbar(`${deletingSeries.series.length} receitas mensais excluídas com sucesso!`, 'success');
+      try {
+        let success = false;
+        
+        if (deleteAll) {
+          // Excluir toda a série
+          success = await IncomesService.deleteBySeries(deletingSeries.income.seriesId!);
+          if (success) {
+            showSnackbar(`${deletingSeries.series.length} receitas mensais excluídas com sucesso!`, 'success');
+          }
+        } else {
+          // Excluir apenas a receita selecionada
+          success = await IncomesService.delete(deletingSeries.income.id);
+          if (success) {
+            showSnackbar('Receita excluída com sucesso!', 'success');
+          }
         }
-      } else {
-        // Excluir apenas a receita selecionada
-        success = IncomesService.delete(deletingSeries.income.id);
-        if (success) {
-          showSnackbar('Receita excluída com sucesso!', 'success');
+        
+        if (!success) {
+          showSnackbar('Erro ao excluir receita(s)!', 'error');
         }
+        
+        await loadData();
+      } catch (error) {
+        console.error('Erro ao excluir série:', error);
+        showSnackbar('Erro ao excluir série!', 'error');
       }
-      
-      if (!success) {
-        showSnackbar('Erro ao excluir receita(s)!', 'error');
-      }
-      
-      loadData();
     }
     
     setDeleteSeriesDialogOpen(false);
@@ -277,7 +301,7 @@ export const Incomes: React.FC = () => {
     setEditingIncome(undefined);
   };
 
-  const handleEditSave = (formData: IncomeFormData) => {
+  const handleEditSave = async (formData: IncomeFormData) => {
     if (!editingIncome) return;
     
     const updatedIncome: Income = {
@@ -290,10 +314,15 @@ export const Incomes: React.FC = () => {
       obs: formData.obs
     };
     
-    IncomesService.update(updatedIncome.id, updatedIncome);
-    showSnackbar('Receita editada com sucesso!', 'success');
-    handleEditClose();
-    loadData();
+    try {
+      await IncomesService.update(updatedIncome.id, updatedIncome);
+      showSnackbar('Receita editada com sucesso!', 'success');
+      handleEditClose();
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao editar receita:', error);
+      showSnackbar('Erro ao editar receita!', 'error');
+    }
   };
 
   const handleApproveClick = (income: Income) => {
@@ -306,7 +335,7 @@ export const Incomes: React.FC = () => {
     setApprovingIncome(undefined);
   };
 
-  const handleApproveSave = (effectiveData: { valueEffective: number; dateEffective: string; obs?: string }) => {
+  const handleApproveSave = async (effectiveData: { valueEffective: number; dateEffective: string; obs?: string }) => {
     if (!approvingIncome) return;
     
     const updatedIncome: Income = {
@@ -316,10 +345,15 @@ export const Incomes: React.FC = () => {
       obs: effectiveData.obs || approvingIncome.obs
     };
     
-    IncomesService.update(updatedIncome.id, updatedIncome);
-    showSnackbar('Receita aprovada com sucesso!', 'success');
-    handleApproveClose();
-    loadData();
+    try {
+      await IncomesService.update(updatedIncome.id, updatedIncome);
+      showSnackbar('Receita aprovada com sucesso!', 'success');
+      handleApproveClose();
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao aprovar receita:', error);
+      showSnackbar('Erro ao aprovar receita!', 'error');
+    }
   };
 
   const handleExportPDF = () => {

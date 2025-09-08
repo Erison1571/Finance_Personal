@@ -19,8 +19,8 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Edit as EditIcon } from '@mui/icons-material';
 import type { Expense, ExpenseFormData, Category, Type } from '../../types';
-import { CategoriesService } from '../../services/categoriesService';
-import { TypesService } from '../../services/typesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
+import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
 import { formatBRL, reaisToCentavos } from '../../utils/currency.util';
 
 interface ExpenseDialogProps {
@@ -83,30 +83,44 @@ export const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
   }, [expense, isEdit, open]);
 
   useEffect(() => {
-    loadCategories();
+    const loadData = async () => {
+      await loadCategories();
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
-    if (formData.categoryId) {
-      loadTypes();
-    } else {
-      setTypes([]);
-      setFormData(prev => ({ ...prev, typeId: '' }));
-    }
+    const loadTypesData = async () => {
+      if (formData.categoryId) {
+        await loadTypes();
+      } else {
+        setTypes([]);
+        setFormData(prev => ({ ...prev, typeId: '' }));
+      }
+    };
+    loadTypesData();
   }, [formData.categoryId]);
 
-  const loadCategories = () => {
-    const allCategories = CategoriesService.getAll();
-    const expenseCategories = allCategories.filter(cat => cat.kind === 'Despesa');
-    setCategories(expenseCategories);
+  const loadCategories = async () => {
+    try {
+      const allCategories = await CategoriesService.getAll();
+      const expenseCategories = allCategories.filter(cat => cat.kind === 'Despesa');
+      setCategories(expenseCategories);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+    }
   };
 
-  const loadTypes = () => {
-    const allTypes = TypesService.getAll();
-    const expenseTypes = allTypes.filter(type => 
-      type.kind === 'Despesa' && type.categoryId === formData.categoryId
-    );
-    setTypes(expenseTypes);
+  const loadTypes = async () => {
+    try {
+      const allTypes = await TypesService.getAll();
+      const expenseTypes = allTypes.filter(type => 
+        type.kind === 'Despesa' && type.categoryId === formData.categoryId
+      );
+      setTypes(expenseTypes);
+    } catch (error) {
+      console.error('Erro ao carregar tipos:', error);
+    }
   };
 
   const validateForm = (): boolean => {

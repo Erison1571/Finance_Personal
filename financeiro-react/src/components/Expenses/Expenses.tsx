@@ -34,9 +34,9 @@ import {
   ArrowDownward as ArrowDownwardIcon
 } from '@mui/icons-material';
 import type { Expense, Category, Type, ExpenseFormData } from '../../types';
-import { ExpensesService } from '../../services/expensesService';
-import { CategoriesService } from '../../services/categoriesService';
-import { TypesService } from '../../services/typesService';
+import { SupabaseExpensesService as ExpensesService } from '../../services/supabase/expensesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
+import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
 import { ExpenseDialog } from './ExpenseDialog';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
 import { EffectiveDialog } from '../Common/EffectiveDialog';
@@ -90,14 +90,23 @@ export const Expenses: React.FC = () => {
     }
   }, [selectedCategory]);
 
-  const loadData = () => {
-    const allExpenses = ExpensesService.getAll();
-    const allCategories = CategoriesService.getAll();
-    const allTypes = TypesService.getAll();
-    
-    setExpenses(allExpenses);
-    setCategories(allCategories.filter(cat => cat.kind === 'Despesa'));
-    setTypes(allTypes.filter(type => type.kind === 'Despesa'));
+  const loadData = async () => {
+    try {
+      const allExpenses = await ExpensesService.getAll();
+      const allCategories = await CategoriesService.getAll();
+      const allTypes = await TypesService.getAll();
+      
+      setExpenses(allExpenses);
+      setCategories(allCategories.filter(cat => cat.kind === 'Despesa'));
+      setTypes(allTypes.filter(type => type.kind === 'Despesa'));
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao carregar dados',
+        severity: 'error'
+      });
+    }
   };
 
   const getFilteredExpenses = () => {
@@ -195,26 +204,31 @@ export const Expenses: React.FC = () => {
     setDialogOpen(false);
   };
 
-  const handleSaveExpense = (expenseData: any) => {
-    const createdExpenses = ExpensesService.create(expenseData);
-    
-    if (createdExpenses.length > 0) {
-      const message = createdExpenses.length === 1 
-        ? 'Despesa criada com sucesso!' 
-        : `${createdExpenses.length} despesas mensais criadas com sucesso!`;
+  const handleSaveExpense = async (expenseData: any) => {
+    try {
+      const createdExpenses = await ExpensesService.create(expenseData);
       
-      showSnackbar(message, 'success');
-      loadData();
-      handleCloseDialog();
-    } else {
-      showSnackbar('Erro ao criar despesa!', 'error');
+      if (createdExpenses.length > 0) {
+        const message = createdExpenses.length === 1 
+          ? 'Despesa criada com sucesso!' 
+          : `${createdExpenses.length} despesas mensais criadas com sucesso!`;
+        
+        showSnackbar(message, 'success');
+        await loadData();
+        handleCloseDialog();
+      } else {
+        showSnackbar('Erro ao criar despesa!', 'error');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar despesa:', error);
+      showSnackbar('Erro ao salvar despesa', 'error');
     }
   };
 
-  const handleDeleteClick = (expense: Expense) => {
+  const handleDeleteClick = async (expense: Expense) => {
     // Verificar se é uma despesa mensal
     if (expense.isMensal && expense.seriesId) {
-      const series = ExpensesService.getBySeries(expense.seriesId);
+      const series = await ExpensesService.getBySeries(expense.seriesId);
       setDeletingSeries({ expense, series });
       setDeleteSeriesDialogOpen(true);
     } else {
@@ -223,13 +237,18 @@ export const Expenses: React.FC = () => {
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingExpense) {
-      const success = ExpensesService.delete(deletingExpense.id);
-      if (success) {
-        showSnackbar('Despesa excluída com sucesso!', 'success');
-        loadData();
-      } else {
+      try {
+        const success = await ExpensesService.delete(deletingExpense.id);
+        if (success) {
+          showSnackbar('Despesa excluída com sucesso!', 'success');
+          await loadData();
+        } else {
+          showSnackbar('Erro ao excluir despesa!', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir despesa:', error);
         showSnackbar('Erro ao excluir despesa!', 'error');
       }
     }
@@ -237,24 +256,30 @@ export const Expenses: React.FC = () => {
     setDeletingExpense(undefined);
   };
 
-  const handleDeleteSeries = (deleteAll: boolean) => {
+  const handleDeleteSeries = async (deleteAll: boolean) => {
     if (!deletingSeries) return;
     
-    if (deleteAll) {
-      // Excluir toda a série
-      deletingSeries.series.forEach(expense => {
-        ExpensesService.delete(expense.id);
-      });
-      showSnackbar('Série de despesas excluída com sucesso!', 'success');
-    } else {
-      // Excluir apenas a despesa selecionada
-      ExpensesService.delete(deletingSeries.expense.id);
-      showSnackbar('Despesa excluída com sucesso!', 'success');
+    try {
+      if (deleteAll) {
+        // Excluir toda a série
+        for (const expense of deletingSeries.series) {
+          await ExpensesService.delete(expense.id);
+        }
+        showSnackbar('Série de despesas excluída com sucesso!', 'success');
+      } else {
+        // Excluir apenas a despesa selecionada
+        await ExpensesService.delete(deletingSeries.expense.id);
+        showSnackbar('Despesa excluída com sucesso!', 'success');
+      }
+      
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao excluir série:', error);
+      showSnackbar('Erro ao excluir série!', 'error');
     }
     
     setDeleteSeriesDialogOpen(false);
     setDeletingSeries(undefined);
-    loadData();
   };
 
   // Funções para Sprint 6
@@ -268,7 +293,7 @@ export const Expenses: React.FC = () => {
     setEditingExpense(undefined);
   };
 
-  const handleEditSave = (formData: ExpenseFormData) => {
+  const handleEditSave = async (formData: ExpenseFormData) => {
     if (!editingExpense) return;
     
     const updatedExpense: Expense = {
@@ -281,10 +306,15 @@ export const Expenses: React.FC = () => {
       obs: formData.obs
     };
     
-    ExpensesService.update(updatedExpense.id, updatedExpense);
-    showSnackbar('Despesa editada com sucesso!', 'success');
-    handleEditClose();
-    loadData();
+    try {
+      await ExpensesService.update(updatedExpense.id, updatedExpense);
+      showSnackbar('Despesa editada com sucesso!', 'success');
+      handleEditClose();
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao editar despesa:', error);
+      showSnackbar('Erro ao editar despesa!', 'error');
+    }
   };
 
   const handleApproveClick = (expense: Expense) => {
@@ -297,7 +327,7 @@ export const Expenses: React.FC = () => {
     setApprovingExpense(undefined);
   };
 
-  const handleApproveSave = (effectiveData: { valueEffective: number; dateEffective: string; obs?: string }) => {
+  const handleApproveSave = async (effectiveData: { valueEffective: number; dateEffective: string; obs?: string }) => {
     if (!approvingExpense) return;
     
     const updatedExpense: Expense = {
@@ -307,10 +337,15 @@ export const Expenses: React.FC = () => {
       obs: effectiveData.obs || approvingExpense.obs
     };
     
-    ExpensesService.update(updatedExpense.id, updatedExpense);
-    showSnackbar('Despesa aprovada com sucesso!', 'success');
-    handleApproveClose();
-    loadData();
+    try {
+      await ExpensesService.update(updatedExpense.id, updatedExpense);
+      showSnackbar('Despesa aprovada com sucesso!', 'success');
+      handleApproveClose();
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao aprovar despesa:', error);
+      showSnackbar('Erro ao aprovar despesa!', 'error');
+    }
   };
 
   const handleClearFilters = () => {

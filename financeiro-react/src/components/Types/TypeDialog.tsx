@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Edit as EditIcon } from '@mui/icons-material';
 import type { Type, TypeFormData, Category } from '../../types';
-import { CategoriesService } from '../../services/categoriesService';
+import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
 
 interface TypeDialogProps {
   open: boolean;
@@ -58,17 +58,24 @@ export const TypeDialog: React.FC<TypeDialogProps> = ({
   }, [type, isEdit, open]);
 
   useEffect(() => {
-    loadCategories();
+    const loadData = async () => {
+      await loadCategories();
+    };
+    loadData();
   }, [formData.kind]);
 
-  const loadCategories = () => {
-    const allCategories = CategoriesService.getAll();
-    const filteredCategories = allCategories.filter(cat => cat.kind === formData.kind);
-    setCategories(filteredCategories);
-    
-    // Resetar categoria se não existir mais no novo vínculo
-    if (formData.categoryId && !filteredCategories.find(cat => cat.id === formData.categoryId)) {
-      setFormData(prev => ({ ...prev, categoryId: '' }));
+  const loadCategories = async () => {
+    try {
+      const allCategories = await CategoriesService.getAll();
+      const filteredCategories = allCategories.filter(cat => cat.kind === formData.kind);
+      setCategories(filteredCategories);
+      
+      // Resetar categoria se não existir mais no novo vínculo
+      if (formData.categoryId && !filteredCategories.find(cat => cat.id === formData.categoryId)) {
+        setFormData(prev => ({ ...prev, categoryId: '' }));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
     }
   };
 
