@@ -18,6 +18,7 @@ export class SupabaseTypesService {
       id: type.id,
       name: type.name,
       categoryId: type.category_id,
+      kind: type.kind,
       createdAt: type.created_at,
       updatedAt: type.updated_at
     }));

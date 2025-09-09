@@ -20,7 +20,7 @@ export class SupabaseExpensesService {
       kind: expense.kind,
       categoryId: expense.category_id,
       typeId: expense.type_id,
-      value: expense.value,
+      value: expense.value, // Usar 'value' (campo correto no Supabase)
       datePrevista: expense.date_prevista,
       dateEfetiva: expense.date_efetiva,
       obs: expense.obs,

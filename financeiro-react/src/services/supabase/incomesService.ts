@@ -20,7 +20,7 @@ export class SupabaseIncomesService {
       kind: income.kind,
       categoryId: income.category_id,
       typeId: income.type_id,
-      value: income.value,
+      value: income.value, // Usar 'value' (campo correto no Supabase)
       datePrevista: income.date_prevista,
       dateEfetiva: income.date_efetiva,
       obs: income.obs,
