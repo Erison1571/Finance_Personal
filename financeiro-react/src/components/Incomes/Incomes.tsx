@@ -39,7 +39,7 @@ import { SupabaseTypesService as TypesService } from '../../services/supabase/ty
 import { IncomeDialog } from './IncomeDialog';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
 import { EffectiveDialog } from '../Common/EffectiveDialog';
-import { formatBRL } from '../../utils/currency.util';
+import { formatBRL, reaisToCentavos } from '../../utils/currency.util';
 import { formatDateBR, formatMonthYear } from '../../utils/date.util';
 import { PDFExportService } from '../../services';
 
@@ -341,8 +341,9 @@ export const Incomes: React.FC = () => {
     if (!approvingIncome) return;
     
     try {
-      // Atualizar apenas a data efetiva e observação (não o valor)
+      // Atualizar valor, data efetiva e observação
       await IncomesService.update(approvingIncome.id, {
+        value: reaisToCentavos(effectiveData.valueEffective),
         dateEfetiva: effectiveData.dateEffective,
         obs: effectiveData.obs || approvingIncome.obs
       });
