@@ -340,15 +340,13 @@ export const Incomes: React.FC = () => {
   const handleApproveSave = async (effectiveData: { valueEffective: number; dateEffective: string; obs?: string }) => {
     if (!approvingIncome) return;
     
-    const updatedIncome: Income = {
-      ...approvingIncome,
-      value: effectiveData.valueEffective,
-      dateEfetiva: effectiveData.dateEffective,
-      obs: effectiveData.obs || approvingIncome.obs
-    };
-    
     try {
-      await IncomesService.update(updatedIncome.id, updatedIncome);
+      // Atualizar apenas a data efetiva e observação (não o valor)
+      await IncomesService.update(approvingIncome.id, {
+        dateEfetiva: effectiveData.dateEffective,
+        obs: effectiveData.obs || approvingIncome.obs
+      });
+      
       showSnackbar('Receita aprovada com sucesso!', 'success');
       handleApproveClose();
       await loadData();

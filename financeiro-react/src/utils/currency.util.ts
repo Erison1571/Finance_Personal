@@ -1,18 +1,16 @@
 /**
- * Formata um valor em centavos para Real brasileiro
+ * Formata um valor em reais para Real brasileiro
  */
 export function formatBRL(value: number): string {
   if (value === null || value === undefined || isNaN(value)) {
     return 'R$ 0,00';
   }
   
-  // Converte centavos para reais
-  const reais = value / 100;
-  
+  // Valor já está em reais (não precisa dividir por 100)
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
-  }).format(reais);
+  }).format(value);
 }
 
 /**

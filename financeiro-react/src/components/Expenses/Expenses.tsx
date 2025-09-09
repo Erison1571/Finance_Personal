@@ -332,15 +332,13 @@ export const Expenses: React.FC = () => {
   const handleApproveSave = async (effectiveData: { valueEffective: number; dateEffective: string; obs?: string }) => {
     if (!approvingExpense) return;
     
-    const updatedExpense: Expense = {
-      ...approvingExpense,
-      value: effectiveData.valueEffective,
-      dateEfetiva: effectiveData.dateEffective,
-      obs: effectiveData.obs || approvingExpense.obs
-    };
-    
     try {
-      await ExpensesService.update(updatedExpense.id, updatedExpense);
+      // Atualizar apenas a data efetiva e observação (não o valor)
+      await ExpensesService.update(approvingExpense.id, {
+        dateEfetiva: effectiveData.dateEffective,
+        obs: effectiveData.obs || approvingExpense.obs
+      });
+      
       showSnackbar('Despesa aprovada com sucesso!', 'success');
       handleApproveClose();
       await loadData();
