@@ -333,11 +333,19 @@ export const Expenses: React.FC = () => {
     if (!approvingExpense) return;
     
     try {
-      // Atualizar apenas a data efetiva e observação (não o valor)
-      await ExpensesService.update(approvingExpense.id, {
-        dateEfetiva: effectiveData.dateEffective,
+      console.log('Aprovando despesa:', approvingExpense.id);
+      console.log('Dados de atualização:', {
+        date_efetiva: effectiveData.dateEffective,
         obs: effectiveData.obs || approvingExpense.obs
       });
+      
+      // Atualizar apenas a data efetiva e observação (não o valor)
+      const result = await ExpensesService.update(approvingExpense.id, {
+        date_efetiva: effectiveData.dateEffective,
+        obs: effectiveData.obs || approvingExpense.obs
+      });
+      
+      console.log('Resultado da atualização:', result);
       
       showSnackbar('Despesa aprovada com sucesso!', 'success');
       handleApproveClose();

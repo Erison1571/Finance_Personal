@@ -343,7 +343,7 @@ export const Incomes: React.FC = () => {
     try {
       // Atualizar apenas a data efetiva e observação (não o valor)
       await IncomesService.update(approvingIncome.id, {
-        dateEfetiva: effectiveData.dateEffective,
+        date_efetiva: effectiveData.dateEffective,
         obs: effectiveData.obs || approvingIncome.obs
       });
       
