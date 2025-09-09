@@ -341,7 +341,7 @@ export const Expenses: React.FC = () => {
       
       // Atualizar apenas a data efetiva e observação (não o valor)
       const result = await ExpensesService.update(approvingExpense.id, {
-        date_efetiva: effectiveData.dateEffective,
+        dateEfetiva: effectiveData.dateEffective,
         obs: effectiveData.obs || approvingExpense.obs
       });
       

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Supabase - Dados Reais</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .total { font-weight: bold; font-size: 18px; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Supabase - Dados Reais</h1>
+    
+    <div id="status" class="info">Carregando dados do Supabase...</div>
+    
+    <div class="section">
+        <h2>📊 Resumo dos Dados</h2>
+        <div id="summary"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🏷️ Categorias</h2>
+        <div id="categories"></div>
+    </div>
+    
+    <div class="section">
+        <h2>📝 Tipos</h2>
+        <div id="types"></div>
+    </div>
+    
+    <div class="section">
+        <h2>💸 Despesas</h2>
+        <div id="expenses"></div>
+    </div>
+    
+    <div class="section">
+        <h2>💰 Receitas</h2>
+        <div id="incomes"></div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://kgbosxjinkyvldwrtuuh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnYm9zeGppbmt5dmxkd3J0dXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzNzk4MzEsImV4cCI6MjA1MTk1NTgzMX0.8QZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZq';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function loadData() {
+            try {
+                // Carregar categorias
+                const { data: categories, error: catError } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .order('name', { ascending: true });
+                
+                if (catError) throw catError;
+                
+                // Carregar tipos
+                const { data: types, error: typeError } = await supabase
+                    .from('types')
+                    .select('*')
+                    .order('name', { ascending: true });
+                
+                if (typeError) throw typeError;
+                
+                // Carregar despesas
+                const { data: expenses, error: expError } = await supabase
+                    .from('expenses')
+                    .select('*')
+                    .order('date_prevista', { ascending: false });
+                
+                if (expError) throw expError;
+                
+                // Carregar receitas
+                const { data: incomes, error: incError } = await supabase
+                    .from('incomes')
+                    .select('*')
+                    .order('date_prevista', { ascending: false });
+                
+                if (incError) throw incError;
+                
+                // Exibir resumo
+                displaySummary(categories, types, expenses, incomes);
+                
+                // Exibir dados detalhados
+                displayCategories(categories);
+                displayTypes(types);
+                displayExpenses(expenses, categories, types);
+                displayIncomes(incomes, categories, types);
+                
+                document.getElementById('status').innerHTML = '<span class="success">✅ Dados carregados com sucesso!</span>';
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                document.getElementById('status').innerHTML = `<span class="error">❌ Erro: ${error.message}</span>`;
+            }
+        }
+        
+        function displaySummary(categories, types, expenses, incomes) {
+            const totalExpenses = expenses.reduce((sum, exp) => sum + (parseFloat(exp.value) || 0), 0);
+            const totalIncomes = incomes.reduce((sum, inc) => sum + (parseFloat(inc.value) || 0), 0);
+            
+            document.getElementById('summary').innerHTML = `
+                <div class="total">
+                    <p>📊 <strong>Resumo Geral:</strong></p>
+                    <p>🏷️ Categorias: ${categories.length}</p>
+                    <p>📝 Tipos: ${types.length}</p>
+                    <p>💸 Despesas: ${expenses.length} - Total: R$ ${totalExpenses.toFixed(2)}</p>
+                    <p>💰 Receitas: ${incomes.length} - Total: R$ ${totalIncomes.toFixed(2)}</p>
+                    <p>💵 Saldo: R$ ${(totalIncomes - totalExpenses).toFixed(2)}</p>
+                </div>
+            `;
+        }
+        
+        function displayCategories(categories) {
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Cor</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${categories.map(cat => `
+                            <tr>
+                                <td>${cat.id}</td>
+                                <td>${cat.name}</td>
+                                <td style="background-color: ${cat.color}; color: white;">${cat.color}</td>
+                                <td>${cat.kind}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('categories').innerHTML = html;
+        }
+        
+        function displayTypes(types) {
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Categoria ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${types.map(type => `
+                            <tr>
+                                <td>${type.id}</td>
+                                <td>${type.name}</td>
+                                <td>${type.category_id}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('types').innerHTML = html;
+        }
+        
+        function displayExpenses(expenses, categories, types) {
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Categoria</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Data Prevista</th>
+                            <th>Data Efetiva</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${expenses.map(exp => {
+                            const category = categories.find(cat => cat.id === exp.category_id);
+                            const type = types.find(typ => typ.id === exp.type_id);
+                            return `
+                                <tr>
+                                    <td>${exp.id}</td>
+                                    <td>${category ? category.name : 'Categoria não encontrada'}</td>
+                                    <td>${type ? type.name : 'Tipo não encontrado'}</td>
+                                    <td>R$ ${parseFloat(exp.value).toFixed(2)}</td>
+                                    <td>${exp.date_prevista}</td>
+                                    <td>${exp.date_efetiva || '-'}</td>
+                                    <td>${exp.obs || '-'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('expenses').innerHTML = html;
+        }
+        
+        function displayIncomes(incomes, categories, types) {
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Categoria</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Data Prevista</th>
+                            <th>Data Efetiva</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${incomes.map(inc => {
+                            const category = categories.find(cat => cat.id === inc.category_id);
+                            const type = types.find(typ => typ.id === inc.type_id);
+                            return `
+                                <tr>
+                                    <td>${inc.id}</td>
+                                    <td>${category ? category.name : 'Categoria não encontrada'}</td>
+                                    <td>${type ? type.name : 'Tipo não encontrado'}</td>
+                                    <td>R$ ${parseFloat(inc.value).toFixed(2)}</td>
+                                    <td>${inc.date_prevista}</td>
+                                    <td>${inc.date_efetiva || '-'}</td>
+                                    <td>${inc.obs || '-'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('incomes').innerHTML = html;
+        }
+        
+        // Carregar dados quando a página carregar
+        loadData();
+    </script>
+</body>
+</html>

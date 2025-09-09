@@ -166,9 +166,34 @@ export class SupabaseIncomesService {
 
   static async update(id: string, updates: Partial<IncomeFormData>): Promise<any | null> {
     try {
+      // Mapear campos do frontend para o formato do Supabase
+      const supabaseUpdates: any = {};
+      
+      if (updates.dateEfetiva !== undefined) {
+        supabaseUpdates.date_efetiva = updates.dateEfetiva;
+      }
+      if (updates.datePrevista !== undefined) {
+        supabaseUpdates.date_prevista = updates.datePrevista;
+      }
+      if (updates.categoryId !== undefined) {
+        supabaseUpdates.category_id = updates.categoryId;
+      }
+      if (updates.typeId !== undefined) {
+        supabaseUpdates.type_id = updates.typeId;
+      }
+      if (updates.isMensal !== undefined) {
+        supabaseUpdates.is_mensal = updates.isMensal;
+      }
+      if (updates.value !== undefined) {
+        supabaseUpdates.value = updates.value;
+      }
+      if (updates.obs !== undefined) {
+        supabaseUpdates.obs = updates.obs;
+      }
+
       const { data, error } = await supabase
         .from('incomes')
-        .update(updates)
+        .update(supabaseUpdates)
         .eq('id', id)
         .select()
         .single();
