@@ -10,7 +10,6 @@ import { Categories } from './components/Categories/Categories';
 import { Types } from './components/Types/Types';
 import { Expenses } from './components/Expenses/Expenses';
 import { Incomes } from './components/Incomes/Incomes';
-import { ErrorBoundary } from './components/Debug/ErrorBoundary';
 
 const theme = createTheme(
   {
@@ -39,17 +38,15 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <ErrorBoundary>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/categorias" element={<Categories />} />
-              <Route path="/tipos" element={<Types />} />
-              <Route path="/despesas" element={<Expenses />} />
-              <Route path="/receitas" element={<Incomes />} />
-            </Routes>
-          </Layout>
-        </ErrorBoundary>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/categorias" element={<Categories />} />
+            <Route path="/tipos" element={<Types />} />
+            <Route path="/despesas" element={<Expenses />} />
+            <Route path="/receitas" element={<Incomes />} />
+          </Routes>
+        </Layout>
       </Router>
     </ThemeProvider>
   );

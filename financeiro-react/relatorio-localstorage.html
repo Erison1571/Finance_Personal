@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório LocalStorage - Controle Financeiro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .summary { background-color: #f0f8ff; }
+        .data { background-color: #f9f9f9; }
+        .total { font-weight: bold; color: #2e7d32; }
+        .count { font-weight: bold; color: #1976d2; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .json { background-color: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>📊 Relatório Completo do LocalStorage</h1>
+    <p><strong>Data:</strong> <span id="dataAtual"></span></p>
+
+    <div class="section summary">
+        <h2>📈 Resumo Geral</h2>
+        <div id="resumoGeral"></div>
+    </div>
+
+    <div class="section data">
+        <h2>📁 Categorias</h2>
+        <div id="categoriasInfo"></div>
+        <div id="categoriasData"></div>
+    </div>
+
+    <div class="section data">
+        <h2>🏷️ Tipos</h2>
+        <div id="tiposInfo"></div>
+        <div id="tiposData"></div>
+    </div>
+
+    <div class="section data">
+        <h2>💸 Despesas</h2>
+        <div id="despesasInfo"></div>
+        <div id="despesasData"></div>
+    </div>
+
+    <div class="section data">
+        <h2>💰 Receitas</h2>
+        <div id="receitasInfo"></div>
+        <div id="receitasData"></div>
+    </div>
+
+    <div class="section">
+        <h2>✅ Checklist de Migração para Supabase</h2>
+        <div id="checklist"></div>
+    </div>
+
+    <script>
+        // Função para formatar moeda
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        // Função para formatar data
+        function formatarData(data) {
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+
+        // Função para obter dados do localStorage
+        function obterDadosLocalStorage() {
+            const categorias = JSON.parse(localStorage.getItem('categories') || '[]');
+            const tipos = JSON.parse(localStorage.getItem('types') || '[]');
+            const despesas = JSON.parse(localStorage.getItem('expenses') || '[]');
+            const receitas = JSON.parse(localStorage.getItem('incomes') || '[]');
+
+            return { categorias, tipos, despesas, receitas };
+        }
+
+        // Função para calcular totais
+        function calcularTotais(despesas, receitas) {
+            const totalDespesas = despesas.reduce((sum, item) => sum + (item.value || 0), 0);
+            const totalReceitas = receitas.reduce((sum, item) => sum + (item.value || 0), 0);
+            const saldo = totalReceitas - totalDespesas;
+
+            return {
+                totalDespesas,
+                totalReceitas,
+                saldo,
+                quantidadeDespesas: despesas.length,
+                quantidadeReceitas: receitas.length
+            };
+        }
+
+        // Função para gerar relatório
+        function gerarRelatorio() {
+            const { categorias, tipos, despesas, receitas } = obterDadosLocalStorage();
+            const totais = calcularTotais(despesas, receitas);
+
+            // Data atual
+            document.getElementById('dataAtual').textContent = new Date().toLocaleString('pt-BR');
+
+            // Resumo geral
+            document.getElementById('resumoGeral').innerHTML = `
+                <p><span class="count">Categorias:</span> ${categorias.length}</p>
+                <p><span class="count">Tipos:</span> ${tipos.length}</p>
+                <p><span class="count">Despesas:</span> ${totais.quantidadeDespesas} - <span class="total">${formatarMoeda(totais.totalDespesas)}</span></p>
+                <p><span class="count">Receitas:</span> ${totais.quantidadeReceitas} - <span class="total">${formatarMoeda(totais.totalReceitas)}</span></p>
+                <p><span class="total">Saldo Total:</span> ${formatarMoeda(totais.saldo)}</p>
+            `;
+
+            // Categorias
+            document.getElementById('categoriasInfo').innerHTML = `
+                <p><span class="count">Total:</span> ${categorias.length} categorias</p>
+            `;
+            
+            if (categorias.length > 0) {
+                let categoriasTable = '<table><tr><th>ID</th><th>Nome</th><th>Cor</th><th>Tipo</th></tr>';
+                categorias.forEach(cat => {
+                    categoriasTable += `<tr><td>${cat.id}</td><td>${cat.name}</td><td style="background-color: ${cat.color}; color: white;">${cat.color}</td><td>${cat.kind}</td></tr>`;
+                });
+                categoriasTable += '</table>';
+                document.getElementById('categoriasData').innerHTML = categoriasTable;
+            } else {
+                document.getElementById('categoriasData').innerHTML = '<p>Nenhuma categoria encontrada</p>';
+            }
+
+            // Tipos
+            document.getElementById('tiposInfo').innerHTML = `
+                <p><span class="count">Total:</span> ${tipos.length} tipos</p>
+            `;
+            
+            if (tipos.length > 0) {
+                let tiposTable = '<table><tr><th>ID</th><th>Nome</th><th>Categoria ID</th></tr>';
+                tipos.forEach(tipo => {
+                    tiposTable += `<tr><td>${tipo.id}</td><td>${tipo.name}</td><td>${tipo.categoryId}</td></tr>`;
+                });
+                tiposTable += '</table>';
+                document.getElementById('tiposData').innerHTML = tiposTable;
+            } else {
+                document.getElementById('tiposData').innerHTML = '<p>Nenhum tipo encontrado</p>';
+            }
+
+            // Despesas
+            document.getElementById('despesasInfo').innerHTML = `
+                <p><span class="count">Total:</span> ${totais.quantidadeDespesas} despesas - <span class="total">${formatarMoeda(totais.totalDespesas)}</span></p>
+            `;
+            
+            if (despesas.length > 0) {
+                let despesasTable = '<table><tr><th>ID</th><th>Valor</th><th>Data Prevista</th><th>Data Efetiva</th><th>Observação</th></tr>';
+                despesas.forEach(desp => {
+                    despesasTable += `<tr><td>${desp.id}</td><td>${formatarMoeda(desp.value || 0)}</td><td>${desp.datePrevista || '-'}</td><td>${desp.dateEfetiva || '-'}</td><td>${desp.obs || '-'}</td></tr>`;
+                });
+                despesasTable += '</table>';
+                document.getElementById('despesasData').innerHTML = despesasTable;
+            } else {
+                document.getElementById('despesasData').innerHTML = '<p>Nenhuma despesa encontrada</p>';
+            }
+
+            // Receitas
+            document.getElementById('receitasInfo').innerHTML = `
+                <p><span class="count">Total:</span> ${totais.quantidadeReceitas} receitas - <span class="total">${formatarMoeda(totais.totalReceitas)}</span></p>
+            `;
+            
+            if (receitas.length > 0) {
+                let receitasTable = '<table><tr><th>ID</th><th>Valor</th><th>Data Prevista</th><th>Data Efetiva</th><th>Observação</th></tr>';
+                receitas.forEach(rec => {
+                    receitasTable += `<tr><td>${rec.id}</td><td>${formatarMoeda(rec.value || 0)}</td><td>${rec.datePrevista || '-'}</td><td>${rec.dateEfetiva || '-'}</td><td>${rec.obs || '-'}</td></tr>`;
+                });
+                receitasTable += '</table>';
+                document.getElementById('receitasData').innerHTML = receitasTable;
+            } else {
+                document.getElementById('receitasData').innerHTML = '<p>Nenhuma receita encontrada</p>';
+            }
+
+            // Checklist de migração
+            document.getElementById('checklist').innerHTML = `
+                <h3>📋 Checklist de Migração para Supabase</h3>
+                <ul>
+                    <li>✅ 1. Verificar dados no localStorage (${categorias.length} categorias, ${tipos.length} tipos, ${totais.quantidadeDespesas} despesas, ${totais.quantidadeReceitas} receitas)</li>
+                    <li>⏳ 2. Limpar dados existentes no Supabase</li>
+                    <li>⏳ 3. Migrar categorias (${categorias.length} registros)</li>
+                    <li>⏳ 4. Migrar tipos (${tipos.length} registros)</li>
+                    <li>⏳ 5. Migrar despesas (${totais.quantidadeDespesas} registros - ${formatarMoeda(totais.totalDespesas)})</li>
+                    <li>⏳ 6. Migrar receitas (${totais.quantidadeReceitas} registros - ${formatarMoeda(totais.totalReceitas)})</li>
+                    <li>⏳ 7. Verificar integridade dos dados migrados</li>
+                    <li>⏳ 8. Testar funcionalidades da aplicação</li>
+                    <li>⏳ 9. Validar totais e cálculos</li>
+                    <li>⏳ 10. Confirmar migração completa</li>
+                </ul>
+                
+                <h3>📊 Dados para Migração:</h3>
+                <div class="json">${JSON.stringify({categorias, tipos, despesas, receitas}, null, 2)}</div>
+            `;
+        }
+
+        // Executar quando a página carregar
+        window.onload = gerarRelatorio;
+    </script>
+</body>
+</html>
