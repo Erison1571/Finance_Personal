@@ -336,13 +336,13 @@ export const Dashboard: React.FC = () => {
     if (approvingItem) {
       if (approvingItem.type === 'expense') {
         await ExpensesService.update(approvingItem.item.id, {
-          ...approvingItem.item.item as Expense,
+          value: data.valueEffective,
           dateEfetiva: data.dateEffective,
           obs: data.obs || approvingItem.item.item.obs
         });
       } else {
         await IncomesService.update(approvingItem.item.id, {
-          ...approvingItem.item.item as Income,
+          value: data.valueEffective,
           dateEfetiva: data.dateEffective,
           obs: data.obs || approvingItem.item.item.obs
         });
