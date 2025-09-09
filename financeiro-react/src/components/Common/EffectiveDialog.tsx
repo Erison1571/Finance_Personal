@@ -28,13 +28,13 @@ export const EffectiveDialog: React.FC<EffectiveDialogProps> = ({
   amount,
   description
 }) => {
-  const [valueEffective, setValueEffective] = useState<number>(amount / 100); // Converter centavos para reais
+  const [valueEffective, setValueEffective] = useState<number>(amount); // Valores já estão em reais
   const [dateEffective, setDateEffective] = useState<string>('');
   const [obs, setObs] = useState<string>('');
 
   React.useEffect(() => {
     if (open) {
-      setValueEffective(amount / 100); // Converter centavos para reais
+      setValueEffective(amount); // Valores já estão em reais
       setDateEffective(new Date().toISOString().split('T')[0]);
       setObs(description || '');
     }

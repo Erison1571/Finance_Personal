@@ -40,7 +40,7 @@ import { SupabaseTypesService as TypesService } from '../../services/supabase/ty
 import { ExpenseDialog } from './ExpenseDialog';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
 import { EffectiveDialog } from '../Common/EffectiveDialog';
-import { formatBRL, reaisToCentavos } from '../../utils/currency.util';
+import { formatBRL } from '../../utils/currency.util';
 import { formatDateBR, formatMonthYear } from '../../utils/date.util';
 import { PDFExportService } from '../../services';
 
@@ -335,14 +335,14 @@ export const Expenses: React.FC = () => {
     try {
       console.log('Aprovando despesa:', approvingExpense.id);
       console.log('Dados de atualização:', {
-        value: reaisToCentavos(effectiveData.valueEffective),
+        value: effectiveData.valueEffective,
         dateEfetiva: effectiveData.dateEffective,
         obs: effectiveData.obs || approvingExpense.obs
       });
       
       // Atualizar valor, data efetiva e observação
       const result = await ExpensesService.update(approvingExpense.id, {
-        value: reaisToCentavos(effectiveData.valueEffective),
+        value: effectiveData.valueEffective,
         dateEfetiva: effectiveData.dateEffective,
         obs: effectiveData.obs || approvingExpense.obs
       });

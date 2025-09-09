@@ -21,7 +21,7 @@ import { Close as CloseIcon, Add as AddIcon, Edit as EditIcon } from '@mui/icons
 import type { Expense, ExpenseFormData, Category, Type } from '../../types';
 import { SupabaseCategoriesService as CategoriesService } from '../../services/supabase/categoriesService';
 import { SupabaseTypesService as TypesService } from '../../services/supabase/typesService';
-import { formatBRL, reaisToCentavos } from '../../utils/currency.util';
+import { formatBRL } from '../../utils/currency.util';
 
 interface ExpenseDialogProps {
   open: boolean;
@@ -152,12 +152,12 @@ export const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      // Converter valor de reais para centavos
-      const valueInCentavos = reaisToCentavos(parseFloat(valueInput.replace(/[^\d,]/g, '').replace(',', '.')));
+      // Valor já está em reais (não precisa converter para centavos)
+      const valueInReais = parseFloat(valueInput.replace(/[^\d,]/g, '').replace(',', '.'));
       
       onSave({
         ...formData,
-        value: valueInCentavos
+        value: valueInReais
       });
     }
   };
@@ -165,10 +165,10 @@ export const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
   const handleValueChange = (value: string) => {
     setValueInput(value);
     
-    // Converter para centavos e validar
+    // Valor já está em reais (não precisa converter para centavos)
     const numericValue = parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.'));
     if (!isNaN(numericValue) && numericValue > 0) {
-      setFormData(prev => ({ ...prev, value: reaisToCentavos(numericValue) }));
+      setFormData(prev => ({ ...prev, value: numericValue }));
     }
   };
 

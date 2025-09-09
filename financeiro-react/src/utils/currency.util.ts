@@ -6,13 +6,11 @@ export function formatBRL(value: number): string {
     return 'R$ 0,00';
   }
   
-  // Converter de centavos para reais (valores vêm do Supabase em centavos)
-  const valueInReais = value / 100;
-  
+  // Valores já estão em reais no Supabase (não precisa dividir por 100)
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
-  }).format(valueInReais);
+  }).format(value);
 }
 
 /**
